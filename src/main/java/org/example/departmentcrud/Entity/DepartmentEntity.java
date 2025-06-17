@@ -41,6 +41,15 @@ public class DepartmentEntity {
 
     private Boolean voided = false;
 
+    @ManyToOne
+    @JoinColumn(name = "created_by", referencedColumnName = "id", insertable = false, updatable = false)
+    private UserEntity createdByUser;
+
+    @ManyToOne
+    @JoinColumn(name = "updated_by", referencedColumnName = "id", insertable = false, updatable = false)
+    private UserEntity updatedByUser;
+
+
     // Custom constructor for required fields
     public DepartmentEntity(String name, String description) {
         this.name = name;

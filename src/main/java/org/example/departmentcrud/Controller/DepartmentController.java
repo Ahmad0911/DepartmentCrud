@@ -1,9 +1,9 @@
 package org.example.departmentcrud.Controller;
 
 import org.example.departmentcrud.Entity.DepartmentEntity;
-import org.example.departmentcrud.Services.DepartmentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.departmentcrud.Services.DepartmentService; // Services (plural)
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,59 +11,59 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/departments")
 public class DepartmentController {
+
     private final DepartmentService departmentService;
 
-    @Autowired
     public DepartmentController(DepartmentService departmentService) {
         this.departmentService = departmentService;
     }
 
-    // POST - Create a new department
     @PostMapping
-    public DepartmentEntity createDepartment(@RequestBody DepartmentEntity department,
-                                       @RequestHeader("X-User") String createdBy) {
-        return departmentService.createDepartment(department, createdBy);
+    public ResponseEntity<DepartmentEntity> createDepartment(
+            @RequestBody DepartmentEntity department,
+            Authentication authentication) {
+        String currentUsername = authentication.getName();
+        DepartmentEntity createdDepartment = departmentService.createDepartment(department, currentUsername);
+        return ResponseEntity.ok(createdDepartment);
     }
 
-    // GET - Get all departments
     @GetMapping
-    public List<DepartmentEntity> getAllDepartments() {
-        return departmentService.getAllDepartments();
+    public ResponseEntity<List<DepartmentEntity>> getAllDepartments() {
+        List<DepartmentEntity> departments = departmentService.getAllDepartments();
+        return ResponseEntity.ok(departments);
     }
 
-    // GET - Get a single department by ID
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentEntity> getDepartmentById(@PathVariable Long id) {
         DepartmentEntity department = departmentService.getDepartmentById(id);
-        if (department != null) {
-            return ResponseEntity.ok(department);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(department);
     }
 
-    // PUT - Update a department
     @PutMapping("/{id}")
-    public ResponseEntity<DepartmentEntity> updateDepartment(@PathVariable Long id,
-                                                       @RequestBody DepartmentEntity departmentDetails,
-                                                       @RequestHeader("X-User") String updatedBy) {
-        DepartmentEntity updatedDepartment = departmentService.updateDepartment(id, departmentDetails, updatedBy);
-        if (updatedDepartment != null) {
-            return ResponseEntity.ok(updatedDepartment);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<DepartmentEntity> updateDepartment(
+            @PathVariable Long id,
+            @RequestBody DepartmentEntity departmentDetails,
+            Authentication authentication) {
+        String currentUsername = authentication.getName();
+        DepartmentEntity updatedDepartment = departmentService.updateDepartment(id, departmentDetails, currentUsername);
+        return ResponseEntity.ok(updatedDepartment);
     }
 
-    // DELETE - Void a department
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> voidDepartment(@PathVariable Long id,
-                                               @RequestHeader("X-User") String voidedBy) {
-        DepartmentEntity voidedDepartment = departmentService.voidDepartment(id, voidedBy);
-        if (voidedDepartment != null) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deleteDepartment(
+            @PathVariable Long id,
+            Authentication authentication) {
+        String currentUsername = authentication.getName();
+        departmentService.deleteDepartment(id, currentUsername);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/void")
+    public ResponseEntity<DepartmentEntity> voidDepartment(
+            @PathVariable Long id,
+            Authentication authentication) {
+        String currentUsername = authentication.getName();
+        DepartmentEntity voidedDepartment = departmentService.voidDepartment(id, currentUsername);
+        return ResponseEntity.ok(voidedDepartment);
     }
 }
